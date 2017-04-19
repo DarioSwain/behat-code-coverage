@@ -9,7 +9,7 @@
 namespace LeanPHP\Behat\CodeCoverage\Driver;
 
 use GuzzleHttp\Client;
-use GuzzleHttp\Message\Response;
+use Psr\Http\Message\ResponseInterface;
 use SebastianBergmann\CodeCoverage\Driver\Driver as DriverInterface;
 
 /**
@@ -25,7 +25,7 @@ class RemoteXdebug implements DriverInterface
     private $config;
 
     /**
-     * @var GuzzleHttp\Client
+     * @var Client
      */
     private $client;
 
@@ -53,14 +53,13 @@ class RemoteXdebug implements DriverInterface
      * ]
      *
      * @param array               $config Configuration
-     * @param GuzzleHttp\Client $client HTTP client
+     * @param Client $client HTTP client
      */
     public function __construct(array $config, Client $client)
     {
         $this->config = $config;
 
-        $this->client = $client;
-        $this->client->setBaseUrl($config['base_url']);
+        $this->client = new Client(['base_url' => $config['base_url']]);
     }
 
     /**
@@ -88,7 +87,7 @@ class RemoteXdebug implements DriverInterface
 
         $response = $this->sendRequest('delete');
 
-        return json_decode($response->getBody(true), true);
+        return json_decode($response->getBody()->getContents(), true);
     }
 
     /**
@@ -97,7 +96,7 @@ class RemoteXdebug implements DriverInterface
      * @param string $endpoint
      * @param array  $headers
      *
-     * @return GuzzleHttp\Message\Response
+     * @return ResponseInterface
      */
     private function sendRequest($endpoint, $headers = array())
     {
